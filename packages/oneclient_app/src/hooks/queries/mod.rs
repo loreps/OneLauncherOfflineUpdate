@@ -39,15 +39,22 @@ pub use analytics::{
     try_cluster_analytics, try_global_analytics, use_cluster_analytics, use_global_analytics,
 };
 pub use auth::{
-    AddOfflineAccountKeys, BeginMicrosoftLoginMutation, CancelMicrosoftLoginKeys,
-    CancelMicrosoftLoginMutation, FinishMicrosoftLoginMutation, RefreshAccountKeys,
+    AddOfflineAccountKeys, RefreshAccountKeys,
     RemoveAccountKeys, SetDefaultAccountKeys, UseRefreshAccount, UseRemoveAccount,
+<<<<<<< HEAD
     UseSetDefaultAccount, accounts_have_microsoft, invalidate_auth_queries,
     login_code_already_handled, mutation_error, mutation_is_pending, mutation_is_running,
     mutation_ok, reset_login_code_dedup, try_account, try_accounts, try_default_account,
     use_account, use_accounts, use_add_microsoft_account, use_add_offline_account,
     use_begin_microsoft_login, use_cancel_microsoft_login, use_current_account,
     use_default_account, use_finish_microsoft_login, use_refresh_account, use_refresh_all_accounts,
+=======
+    UseSetDefaultAccount, accounts_have_microsoft, mutation_error,
+    mutation_is_pending, mutation_is_running, try_account, try_accounts, try_default_account,
+    use_account, use_accounts, use_add_offline_account,
+    use_current_account,
+    use_default_account, use_refresh_account, use_refresh_all_accounts,
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
     use_remove_account, use_set_default_account,
 };
 pub use bundles::{

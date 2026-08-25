@@ -22,8 +22,11 @@ pub enum AppChannel {
     Notifications,
     Game,
     AccountSwitcher,
+<<<<<<< HEAD
     ControlCenter,
     MicrosoftLogin,
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
     Installs,
     StorageScan,
     Relocation,
@@ -46,8 +49,11 @@ pub struct AppState {
     pub center_open: bool,
     pub game: GameState,
     pub account_switcher_open: bool,
+<<<<<<< HEAD
     pub control_center_open: bool,
     pub microsoft_login: Option<LoginProgress>,
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
     pub installs: InstallState,
     pub storage_scan: Option<StorageScanProgress>,
     pub relocation: RelocationState,
@@ -209,6 +215,7 @@ pub struct SettingsState {
     pub error: Option<String>,
 }
 
+<<<<<<< HEAD
 /// Rendered inside the sign-in modal rather than as a toast the core reports it
 /// as ordinary progress and has no opinion about where it is shown
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -240,6 +247,8 @@ impl LaunchBlock {
     }
 }
 
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct GameState {
     pub stages: HashMap<i64, LaunchStage>,

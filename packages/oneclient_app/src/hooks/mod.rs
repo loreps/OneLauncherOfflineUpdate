@@ -31,6 +31,7 @@ pub use actions::{Actions, NotificationBuilder, PumpSignal, modpack_job_running}
 pub use queries::ALL_VERSIONS;
 pub(crate) use queries::use_folder_watch;
 pub use queries::{
+<<<<<<< HEAD
     AddOfflineAccountKeys, AvailableBundlesQuery, BROWSE_PAGE_SIZE, BeginMicrosoftLoginMutation,
     CachedImageQuery, CancelMicrosoftLoginKeys, CancelMicrosoftLoginMutation, ClusterAction,
     ClusterBundles, ClusterLogsQuery, ClusterMutation, DisableWarningsQuery, DiscardLeftoversKeys,
@@ -67,6 +68,41 @@ pub use queries::{
     use_migratable_routes, use_migration, use_mods_folder_sync, use_named_profiles,
     use_onboarding_bundles, use_package_categories, use_package_meta_batch, use_package_project,
     use_package_search, use_package_updates, use_package_versions_when, use_player_profile,
+=======
+    AddOfflineAccountKeys, BROWSE_PAGE_SIZE, CachedImageQuery,
+    ClusterAction, ClusterBundles,
+    ClusterLogsQuery, LogAction, LogContentQuery, MigrationQuery,
+    OnboardingBundlesQuery, RefreshAccountKeys, RemoveAccountKeys, ScreenshotAction,
+    SetDefaultAccountKeys, StorageAction, StorageActionMutation, StorageReportQuery, TermsQuery,
+    UploadLogKeys, UploadLogMutation, UseLogAction,
+    UseRemoveAccount, UseScreenshotAction, UseSetDefaultAccount,
+    UseStorageAction, UseUploadLog,
+    VERSIONS_PAGE_SIZE, accounts_have_microsoft, bundle_overrides_map, bundles_with_status_items,
+    category_list, changelog_error, changelog_groups, changelog_is_loading, cluster_content_items,
+    content_type_for_slug, has_migration_data, invalidate_cluster_content_queries,
+    invalidate_cluster_queries, invalidate_java_queries,
+    invalidate_logs_queries, invalidate_profile_queries, invalidate_screenshots_queries,
+    invalidate_storage_queries, try_storage_report, use_storage_action, use_storage_report,
+    java_runtimes, latest_changelog_version, loaded_image, loader_versions,
+    migration_detection,
+    mutation_error, mutation_is_pending, mutation_is_running, onboarding_bundles_items, package_meta_batch,
+    package_updates, pick_version_metadata, project_detail, provider_versions, query_error,
+    query_is_busy, stale_hashes, use_package_updates,
+    query_is_loading, search_items, search_pending, search_total,
+    settled_or_loading, terms_document, terms_error, terms_is_loading, try_account,
+    try_accounts, try_cluster_analytics, try_cluster_logs, try_cluster_screenshots,
+    try_default_account, try_game_profile, try_global_analytics, try_log_content, use_account,
+    use_accounts, use_add_offline_account,
+    use_bundle_overrides, use_bundle_updates, use_bundles_with_status, use_cached_image,
+    use_changelog, use_cluster_analytics, use_cluster_content,
+    use_cluster_logs, use_cluster_mutation, use_cluster_profile, use_cluster_screenshots,
+    use_cluster, use_cluster_settings, use_clusters, use_current_account, use_default_account,
+    use_game_profile, use_global_analytics, use_java_runtimes,
+    use_loader_versions, use_local_image, use_log_action, use_log_content, use_migration,
+    use_named_profiles, use_onboarding_bundles, use_package_categories, use_package_meta_batch,
+    use_package_project, use_package_search, use_package_versions, use_package_versions_when,
+    use_player_profile,
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
     use_player_skin, use_provider_versions, use_refresh_account, use_refresh_all_accounts,
     use_remove_account, use_screenshot_action, use_screenshot_folder_watch,
     use_set_default_account, use_shadowed_mods, use_storage_action, use_storage_report, use_terms,
@@ -81,8 +117,12 @@ pub use queries::{
 
 use crate::notifications::NotificationSnapshot;
 use crate::state::{
+<<<<<<< HEAD
     AppChannel, GameState, InstallState, LauncherInit, LoginProgress, ReleaseMigrationPrompt,
     RelocationState, SettingsState, StorageScanProgress,
+=======
+    AppChannel, GameState, InstallState, LauncherInit, SettingsState,
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 };
 use freya::prelude::*;
 use freya::radio::use_radio;
@@ -155,6 +195,7 @@ pub fn use_game_snapshot() -> GameState {
 pub fn use_installs_snapshot() -> InstallState {
     use_radio(AppChannel::Installs).read().installs.clone()
 }
+<<<<<<< HEAD
 
 pub fn use_storage_scan_progress() -> Option<StorageScanProgress> {
     use_radio(AppChannel::StorageScan)
@@ -176,3 +217,5 @@ pub fn use_microsoft_login_status() -> Option<LoginProgress> {
         .microsoft_login
         .clone()
 }
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)

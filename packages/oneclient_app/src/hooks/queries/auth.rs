@@ -4,24 +4,14 @@ use freya::query::{
     Mutation, MutationCapability, MutationStateData, QueriesStorage, Query, QueryCapability,
     UseMutation, UseQuery, use_mutation, use_query,
 };
+<<<<<<< HEAD
 use oneclient_auth::{AccountKind, MicrosoftLoginSession, MinecraftAccount};
 use oneclient_core::LauncherError;
+=======
+use oneclient_core::LauncherError;
+use oneclient_auth::{AccountKind, MinecraftAccount};
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 use uuid::Uuid;
-
-static HANDLED_LOGIN_CODE: Mutex<Option<String>> = Mutex::new(None);
-
-pub fn login_code_already_handled(user_code: &str) -> bool {
-    let mut handled = HANDLED_LOGIN_CODE.lock().unwrap();
-    if handled.as_deref() == Some(user_code) {
-        return true;
-    }
-    *handled = Some(user_code.to_string());
-    false
-}
-
-pub fn reset_login_code_dedup() {
-    *HANDLED_LOGIN_CODE.lock().unwrap() = None;
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct ListAccountsKeys;
@@ -125,6 +115,7 @@ pub async fn invalidate_auth_queries(account_id: Option<Uuid>) {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+<<<<<<< HEAD
 pub struct BeginMicrosoftLoginMutation;
 
 impl MutationCapability for BeginMicrosoftLoginMutation {
@@ -207,6 +198,8 @@ impl MutationCapability for AddMicrosoftAccountMutation {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 pub struct AddOfflineAccountMutation;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -287,6 +280,22 @@ impl MutationCapability for SetDefaultAccountMutation {
     }
 }
 
+pub type UseSetDefaultAccount = UseMutation<SetDefaultAccountMutation>;
+pub type UseRemoveAccount = UseMutation<RemoveAccountMutation>;
+pub type UseRefreshAccount = UseMutation<RefreshAccountMutation>;
+
+pub fn use_add_offline_account() -> UseMutation<AddOfflineAccountMutation> {
+    use_mutation(Mutation::new(AddOfflineAccountMutation))
+}
+
+pub fn use_remove_account() -> UseMutation<RemoveAccountMutation> {
+    use_mutation(Mutation::new(RemoveAccountMutation))
+}
+
+pub fn use_set_default_account() -> UseMutation<SetDefaultAccountMutation> {
+    use_mutation(Mutation::new(SetDefaultAccountMutation))
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct RefreshAccountMutation;
 
@@ -332,38 +341,6 @@ impl MutationCapability for RefreshAllAccountsMutation {
     async fn on_settled(&self, _keys: &Self::Keys, _result: &Result<Self::Ok, Self::Err>) {
         invalidate_auth_queries(None).await;
     }
-}
-
-pub type UseSetDefaultAccount = UseMutation<SetDefaultAccountMutation>;
-pub type UseRemoveAccount = UseMutation<RemoveAccountMutation>;
-pub type UseRefreshAccount = UseMutation<RefreshAccountMutation>;
-
-pub fn use_begin_microsoft_login() -> UseMutation<BeginMicrosoftLoginMutation> {
-    use_mutation(Mutation::new(BeginMicrosoftLoginMutation))
-}
-
-pub fn use_finish_microsoft_login() -> UseMutation<FinishMicrosoftLoginMutation> {
-    use_mutation(Mutation::new(FinishMicrosoftLoginMutation))
-}
-
-pub fn use_cancel_microsoft_login() -> UseMutation<CancelMicrosoftLoginMutation> {
-    use_mutation(Mutation::new(CancelMicrosoftLoginMutation))
-}
-
-pub fn use_add_microsoft_account() -> UseMutation<AddMicrosoftAccountMutation> {
-    use_mutation(Mutation::new(AddMicrosoftAccountMutation))
-}
-
-pub fn use_add_offline_account() -> UseMutation<AddOfflineAccountMutation> {
-    use_mutation(Mutation::new(AddOfflineAccountMutation))
-}
-
-pub fn use_remove_account() -> UseMutation<RemoveAccountMutation> {
-    use_mutation(Mutation::new(RemoveAccountMutation))
-}
-
-pub fn use_set_default_account() -> UseMutation<SetDefaultAccountMutation> {
-    use_mutation(Mutation::new(SetDefaultAccountMutation))
 }
 
 pub fn use_refresh_account() -> UseMutation<RefreshAccountMutation> {

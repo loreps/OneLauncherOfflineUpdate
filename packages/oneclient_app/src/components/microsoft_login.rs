@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 use crate::state::LoginProgress;
 use freya::prelude::*;
 use freya::query::{MutationCapability, MutationStateData, UseMutation};
@@ -436,3 +437,5 @@ fn device_code_dialog_body(code: String, verification_uri: String) -> impl IntoE
         )
         .into_element()
 }
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)

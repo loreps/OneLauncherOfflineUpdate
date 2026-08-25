@@ -17,5 +17,5 @@ pub use diagnostics::{AuthErrorGuidance, AuthErrorSample, diagnose_auth_error, p
 pub use error::{AuthError, AuthResult, MinecraftAuthError, MinecraftAuthStep};
 pub use msa::PendingBrowserLogin;
 pub use offline::{offline_account, offline_uuid, validate_offline_username};
-pub use service::{AuthService, MICROSOFT_LOGIN_PROGRESS};
+pub use service::{AuthService};
 pub use store::CredentialsStore;

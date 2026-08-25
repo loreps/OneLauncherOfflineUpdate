@@ -162,7 +162,7 @@ async fn current_account(
         return Ok(None);
     };
 
-    Ok(account.is_microsoft().then_some(account))
+    Ok(Some(account))
 }
 
 async fn run_session(

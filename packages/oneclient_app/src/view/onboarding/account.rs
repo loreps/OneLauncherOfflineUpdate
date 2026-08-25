@@ -1,8 +1,11 @@
 use freya::prelude::*;
+use freya::query::MutationStateData;
 use oneclient_auth::MinecraftAccount;
 
-use crate::components::{Avatar, Button, Icon, IconType, use_microsoft_login};
-use crate::hooks::{try_default_account, use_current_account};
+use crate::components::{Avatar, Button, Icon, IconType, TextInput};
+use crate::hooks::{
+    AddOfflineAccountKeys, try_default_account, use_add_offline_account, use_current_account,
+};
 use crate::routes::Route;
 use crate::theme::colors;
 use crate::view::onboarding::{
@@ -15,10 +18,52 @@ pub struct OnboardingAccount;
 impl Component for OnboardingAccount {
     fn render(&self) -> impl IntoElement {
         let account_query = use_current_account();
-        let msa = use_microsoft_login();
+        let add_offline = use_add_offline_account();
 
         let account = try_default_account(&account_query);
         let has_account = account.is_some();
+
+        let mut username = use_state(String::new);
+        let mut closing = use_state(|| false);
+
+        use_side_effect(move || {
+            if !*closing.read() {
+                return;
+            }
+            match &*add_offline.read().state() {
+                MutationStateData::Settled { res: Ok(_), .. } => {
+                    closing.set(false);
+                    username.set(String::new());
+                }
+                MutationStateData::Settled { res: Err(_), .. } => {
+                    closing.set(false);
+                }
+                _ => {}
+            }
+        });
+
+        let offline_name = username.read().trim().to_string();
+        let offline_uuid = (!offline_name.is_empty())
+            .then(|| oneclient_auth::offline_uuid(&offline_name).to_string());
+
+        let offline_error = match &*add_offline.read().state() {
+            MutationStateData::Settled {
+                res: Err(err), ..
+            } => Some(err.to_string()),
+            MutationStateData::Loading {
+                res: Some(Err(err)),
+            } => Some(err.to_string()),
+            _ => None,
+        };
+
+        let on_confirm = move |_| {
+            let name = username.peek().trim().to_string();
+            if name.is_empty() {
+                return;
+            }
+            add_offline.mutate(AddOfflineAccountKeys { username: name });
+            closing.set(true);
+        };
 
         let content = rect()
             .vertical()
@@ -26,15 +71,17 @@ impl Component for OnboardingAccount {
             .spacing(24.)
             .child(step_heading(
                 "Account",
-                "Before you continue, we require you to own a copy of Minecraft: Java Edition.",
+                "Enter a username to play offline.",
             ))
             .child(match &account {
                 Some(account) => account_preview(account).into_element(),
-                None => {
-                    let start = msa.clone();
-                    sign_in_card(msa.pending, msa.error.clone(), move |_| start.start())
-                        .into_element()
-                }
+                None => offline_account_form(
+                    username,
+                    offline_uuid,
+                    offline_error,
+                    on_confirm,
+                )
+                .into_element(),
             })
             .into_element();
 
@@ -52,7 +99,6 @@ impl Component for OnboardingAccount {
             .width(Size::fill())
             .height(Size::fill())
             .child(page)
-            .maybe_child(msa.popup())
     }
 }
 
@@ -93,27 +139,49 @@ fn account_preview(account: &MinecraftAccount) -> impl IntoElement {
         .into_element()
 }
 
-fn sign_in_card(
-    pending: bool,
+fn offline_account_form(
+    username: State<String>,
+    uuid_preview: Option<String>,
     error: Option<String>,
-    on_add: impl FnMut(Event<PressEventData>) + 'static,
+    on_confirm: impl FnMut(Event<PressEventData>) + 'static,
 ) -> impl IntoElement {
     rect()
         .vertical()
+        .width(Size::fill())
         .spacing(12.)
         .cross_align(Alignment::Start)
         .child(
-            Button::new()
-                .primary()
-                .large()
-                .enabled(!pending)
-                .on_press(on_add)
-                .child(Icon::new(IconType::Globe01).size(16.))
-                .text(if pending {
-                    "Signing in..."
-                } else {
-                    "Add Account"
-                }),
+            rect()
+                .vertical()
+                .width(Size::fill())
+                .spacing(6.)
+                .child(
+                    label()
+                        .text("Username")
+                        .font_size(11.)
+                        .font_weight(FontWeight::MEDIUM)
+                        .color(colors::fg_secondary()),
+                )
+                .child(TextInput::new(username).placeholder("Offline username")),
+        )
+        .child(
+            rect()
+                .vertical()
+                .width(Size::fill())
+                .spacing(6.)
+                .child(
+                    label()
+                        .text("UUID")
+                        .font_size(11.)
+                        .font_weight(FontWeight::MEDIUM)
+                        .color(colors::fg_secondary()),
+                )
+                .child(
+                    label()
+                        .text(uuid_preview.unwrap_or_else(|| "—".to_string()))
+                        .font_size(12.)
+                        .color(colors::fg_secondary()),
+                ),
         )
         .maybe_child(error.map(|message| {
             rect()
@@ -128,5 +196,13 @@ fn sign_in_card(
                 .child(label().text(message).font_size(12.).color(colors::danger()))
                 .into_element()
         }))
+        .child(
+            Button::new()
+                .primary()
+                .large()
+                .on_press(on_confirm)
+                .child(Icon::new(IconType::Plus).size(16.))
+                .text("Add Account"),
+        )
         .into_element()
 }

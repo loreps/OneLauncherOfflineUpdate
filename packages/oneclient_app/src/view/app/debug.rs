@@ -3,16 +3,20 @@ use freya::router::RouterContext;
 use oneclient_db::console::{ConsoleQueryResult, run_console_query};
 use oneclient_db::models::OptionalModStatus;
 
-use oneclient_auth::preview_samples;
 use oneclient_core::simulate::Damage;
 use oneclient_net::status::{self, ServiceStatus};
 
 use crate::Actions;
+<<<<<<< HEAD
 use crate::components::{Button, Dropdown, Icon, IconType, TextInput, login_dialog, toggle};
 use crate::hooks::{
     invalidate_auth_queries, settled_or_loading, try_default_account, use_active_cluster_id,
     use_clusters, use_current_account, use_dispatch,
 };
+=======
+use crate::components::{Button, Dropdown, Icon, IconType, TextInput, toggle};
+use crate::hooks::use_dispatch;
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 use crate::notifications::{
     ClusterUpdateItem, ClusterUpdateSummary, NotificationAction, NotificationActionKind,
     OptionalModsGroup,
@@ -96,6 +100,7 @@ impl Component for Debug {
                     ))
                     .child(divider())
                     .child(section(
+<<<<<<< HEAD
                         "Auth Error Guidance",
                         vec![AuthGuidancePreview.into_element()],
                     ))
@@ -106,6 +111,8 @@ impl Component for Debug {
                     ))
                     .child(divider())
                     .child(section(
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
                         "Corruption Simulator",
                         vec![CorruptionSimulator.into_element()],
                     ))
@@ -873,6 +880,7 @@ impl Component for StatusBarSimulator {
     }
 }
 
+<<<<<<< HEAD
 #[derive(PartialEq)]
 struct AuthGuidancePreview;
 
@@ -1059,6 +1067,8 @@ fn run_expiry(dispatch: &crate::Actions, kind: ExpiryKind, id: uuid::Uuid, usern
     });
 }
 
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 /// Presets are grouped by which layer should catch them same-length corruption only the hashing pass finds truncation the launch-time size check
 #[derive(PartialEq)]
 struct CorruptionSimulator;

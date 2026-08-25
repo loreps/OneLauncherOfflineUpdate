@@ -11,7 +11,11 @@ use tokio::sync::mpsc;
 
 use crate::hooks::PumpSignal;
 use crate::notifications::{MESSAGE_TOAST_TTL, PendingPromptView};
+<<<<<<< HEAD
 use crate::state::{AppChannel, AppState, LoginProgress, StorageScanProgress};
+=======
+use crate::state::{AppChannel, AppState};
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 
 /// Quiet period before log lines are written without it every line wakes the log view
 const GAME_LOG_FLUSH: Duration = Duration::from_millis(120);
@@ -132,8 +136,11 @@ impl EventPump {
         let mut stages: Vec<(i64, LaunchStage)> = Vec::new();
         let mut logs: Vec<(i64, String)> = Vec::new();
         let mut failed: Option<(i64, String)> = None;
+<<<<<<< HEAD
         let mut login: Option<Option<LoginProgress>> = None;
         let mut storage_scan: Option<Option<StorageScanProgress>> = None;
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
         let mut sync_complete = false;
 
         for event in batch {
@@ -158,6 +165,7 @@ impl EventPump {
                 Event::Game(GameEvent::Failed {
                     cluster_id,
                     message,
+<<<<<<< HEAD
                 }) => {
                     folded.saw_stage = true;
                     failed = Some((cluster_id, message));
@@ -186,6 +194,9 @@ impl EventPump {
                         total,
                     }));
                 }
+=======
+                }) => failed = Some((cluster_id, message)),
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
                 other => engine_events.push(other),
             }
         }
@@ -219,6 +230,7 @@ impl EventPump {
                 .fetching = false;
         }
 
+<<<<<<< HEAD
         if let Some(progress) = login {
             self.station
                 .write_channel(AppChannel::MicrosoftLogin)
@@ -231,6 +243,8 @@ impl EventPump {
                 .storage_scan = progress;
         }
 
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
         if !engine_events.is_empty() {
             folded.touched_engine = true;
             let mut guard = self.station.write_channel(AppChannel::Notifications);

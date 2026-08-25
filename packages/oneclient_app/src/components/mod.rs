@@ -26,11 +26,14 @@ mod java_prompt;
 mod link_confirm;
 mod local_image;
 mod log_viewer;
+<<<<<<< HEAD
 mod markdown;
 mod memory_field;
 mod microsoft_java_prompt;
 mod microsoft_login;
 mod modpack_confirm_popup;
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 mod navbar;
 mod notifications;
 mod optional_mods_popup;
@@ -87,12 +90,15 @@ pub use java_prompt::JavaPromptOverlay;
 pub use link_confirm::ConfirmLinkOverlay;
 pub use local_image::LocalImage;
 pub use log_viewer::LogViewer;
+<<<<<<< HEAD
 pub use markdown::{Markdown, MarkdownStyle};
 pub use memory_field::memory_field;
 pub use microsoft_java_prompt::MicrosoftJavaPromptOverlay;
 pub(crate) use microsoft_login::login_dialog;
 pub use microsoft_login::{MicrosoftLogin, use_microsoft_login};
 pub use modpack_confirm_popup::ModpackConfirmPopup;
+=======
+>>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 pub(crate) use navbar::window_controls;
 pub use navbar::{AppNavbar, OnboardingNavbar};
 pub use notifications::{ChevronToggle, NotificationCenter};
