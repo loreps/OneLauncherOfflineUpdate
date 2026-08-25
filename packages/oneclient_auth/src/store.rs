@@ -91,10 +91,6 @@ impl CredentialsStore {
     }
 
     fn insert_offline_account(&mut self, username: String) -> AuthResult<MinecraftAccount> {
-        if !self.has_microsoft_account() {
-            return Err(AuthError::OfflineRequiresMicrosoft);
-        }
-
         validate_offline_username(&username)?;
 
         if self
@@ -204,10 +200,6 @@ impl CredentialsStore {
         let Some(account) = self.users.get(&id).cloned() else {
             return Ok(None);
         };
-
-        if account.is_offline() && !self.has_microsoft_account() {
-            return Err(AuthError::OfflineRequiresMicrosoft);
-        }
 
         Ok(Some(account))
     }

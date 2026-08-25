@@ -1,0 +1,44 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          save-cache: true
+          restore-cache: true
+
+      - name: Install cargo-packager
+        uses: ./.github/actions/install-cargo-tool
+        with:
+          tool: cargo-packager
+          version: 0.11.8
+
+      - name: Build release binary
+        run: cargo build --release --bin oneclient_app
+
+      - name: Stage app-local VC++ runtime
+        shell: bash
+        run: python3 distribution/windows/bundle-crt.py
+
+      - name: Package as NSIS installer
+        shell: bash
+        env:
+          CI: "true"
+        run: cargo packager --release --formats nsis --verbose
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneClient-Windows-Installer
+          path: target/release/*-setup.exe
+          if-no-files-found: error
