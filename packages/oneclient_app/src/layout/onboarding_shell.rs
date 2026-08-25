@@ -6,11 +6,13 @@ use freya::router::{Outlet, use_route};
 use crate::Route;
 use crate::components::OnboardingNavbar;
 use crate::hooks::{
-    OnboardingSelectionState, has_migration_data, onboarding_bundles_items, use_launcher,
-    use_migration, use_onboarding_bundles, use_provide_onboarding_selection, use_settings_snapshot,
+    OnboardingSelectionState, has_migration_data, migration_detection, onboarding_bundles_items,
+    use_migration, use_onboarding_bundles, use_provide_onboarding_selection,
 };
 use crate::theme::colors;
-use crate::view::onboarding::{default_selection, onboarding_step_index, onboarding_total};
+use crate::view::onboarding::{
+    LoadingBackdrop, default_selection, onboarding_step_index, onboarding_total,
+};
 
 #[derive(PartialEq)]
 pub struct OnboardingShell;
@@ -19,39 +21,59 @@ impl Component for OnboardingShell {
     fn render(&self) -> impl IntoElement {
         let mut selected = use_state(HashSet::new);
         let user_touched = use_state(|| false);
-        let migrated_categories = use_state(|| None::<Vec<String>>);
-        let language = use_state(|| "English".to_string());
+        let mut migrated_categories = use_state(|| None::<Vec<String>>);
+        let mut language = use_state(|| "English".to_string());
         let reduce_motion = use_state(|| false);
-        let import_folder = use_state(|| None::<String>);
+        let predownload = use_state(|| true);
+        let setup_started = use_state(|| false);
+        let mut import_folder = use_state(|| None::<String>);
         let import_dedicated = use_state(|| false);
-        let picks_location = use_state({
-            let fresh = use_launcher().needs_location;
-            move || fresh
-        });
         use_provide_onboarding_selection(OnboardingSelectionState {
             selected,
             user_touched,
             migrated_categories,
             language,
             reduce_motion,
+            predownload,
+            setup_started,
             import_folder,
             import_dedicated,
-            picks_location,
         });
 
         let migration_query = use_migration();
         let detected_migration = has_migration_data(&migration_query);
 
         let route = use_route::<Route>();
-        let choosing_location = *picks_location.read();
-        let step_index = onboarding_step_index(&route, detected_migration, choosing_location);
-
-        let onboarded = use_settings_snapshot().settings.seen_onboarding;
-        let reconsent = onboarded && matches!(&route, Route::OnboardingTerms {});
+        let step_index = onboarding_step_index(&route, detected_migration);
 
         let bundles = use_onboarding_bundles();
 
         use_side_effect(move || {
+            // Auto-set English language
+            if *language.peek() != "English" {
+                language.set("English".to_string());
+            }
+
+            // Auto-detect and import MC files if they exist
+            if import_folder.peek().is_none() {
+                if let Some(detection) = migration_detection(&migration_query) {
+                    if let Some(instance) = detection.instances.first() {
+                        if instance.has_game_dir {
+                            migrated_categories.set(Some(
+                                detection
+                                    .instances
+                                    .iter()
+                                    .flat_map(|i| i.categories.iter().cloned())
+                                    .collect::<HashSet<_>>()
+                                    .into_iter()
+                                    .collect(),
+                            ));
+                            import_folder.set(Some(instance.folder_name.clone()));
+                        }
+                    }
+                }
+            }
+
             if *user_touched.peek() {
                 return;
             }
@@ -64,6 +86,14 @@ impl Component for OnboardingShell {
                 selected.set(defaults);
             }
         });
+        let show_backdrop =
+            matches!(&route, Route::OnboardingDownloading {}) && *setup_started.read();
+        let backdrop = show_backdrop.then(|| {
+            let clusters = onboarding_bundles_items(&bundles)
+                .map(|items| items.into_iter().map(|cb| cb.cluster).collect())
+                .unwrap_or_default();
+            LoadingBackdrop { clusters }.into_element()
+        });
 
         rect()
             .vertical()
@@ -72,6 +102,7 @@ impl Component for OnboardingShell {
             .background(colors::page())
             .color(colors::fg_primary())
             .overflow(Overflow::Clip)
+            .maybe_child(backdrop)
             .child(
                 rect()
                     .vertical()
@@ -79,13 +110,10 @@ impl Component for OnboardingShell {
                     .height(Size::fill())
                     .content(Content::Flex)
                     .layer(Layer::Relative(30))
-                    .maybe_child((!reconsent).then(|| {
-                        progress_bar(
-                            step_index,
-                            onboarding_total(detected_migration, choosing_location),
-                        )
-                        .into_element()
-                    }))
+                    .child(progress_bar(
+                        step_index,
+                        onboarding_total(detected_migration),
+                    ))
                     .child(OnboardingNavbar)
                     .child(
                         rect()

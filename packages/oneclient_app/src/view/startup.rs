@@ -3,17 +3,13 @@ use freya::{prelude::*, router::*};
 
 use crate::AppAssets;
 use crate::Route;
-use crate::components::{Button, progress_track};
-use crate::hooks::use_dispatch;
 use crate::hooks::{
-    terms_document, terms_is_loading, use_launcher, use_notifications_snapshot,
-    use_settings_snapshot, use_splash, use_terms,
+    terms_document, terms_is_loading, use_launcher, use_notifications_snapshot, use_settings_snapshot,
+    use_splash, use_terms,
 };
+use crate::hooks::use_dispatch;
+use crate::components::Button;
 use crate::theme::colors;
-
-/// Startup is a sequence of boolean gates, not measurable work, so the bar steps
-/// once per gate the launcher clears instead of tracking bytes
-const STARTUP_STEPS: u8 = 3;
 
 #[derive(PartialEq)]
 struct RecoveryActions {
@@ -69,6 +65,7 @@ impl Component for Startup {
         let notifications = use_notifications_snapshot();
         let terms = use_terms();
         let splash = use_splash();
+        let dispatch = use_dispatch();
 
         let intro = use_animation(|conf| {
             conf.on_creation(OnCreation::Run);
@@ -89,11 +86,6 @@ impl Component for Startup {
 
         let logo = use_memo(|| AppAssets::get_bytes("logo.svg").unwrap_or_default());
 
-        if launcher.needs_location {
-            let _ = RouterContext::get().replace(Route::OnboardingWelcome {});
-            return rect().into_element();
-        }
-
         if launcher.ready && !terms_is_loading(&terms) {
             let document = terms_document(&terms);
             let required_terms = document.as_ref().map(|doc| doc.version).unwrap_or(1);
@@ -106,20 +98,27 @@ impl Component for Startup {
                 || settings.settings.accepted_privacy_version < required_privacy;
 
             let destination = if !settings.settings.seen_onboarding {
-                Route::OnboardingWelcome {}
-            } else if settings.settings.declined_tos {
-                Route::Home {}
+                // Auto-accept terms so they don't block the flow
+                if stale {
+                    dispatch.accept_tos(required_terms, required_privacy);
+                }
+                Route::OnboardingAccount {}
             } else if stale {
-                Route::OnboardingTerms {}
+                Route::Home {}
             } else {
                 Route::Home {}
             };
 
-            let heading_to_onboarding = matches!(destination, Route::OnboardingWelcome { .. });
-            let heading_to_terms = matches!(destination, Route::OnboardingTerms { .. });
+            // Onboarding needs the bundle catalog before it can render its steps so gate it on the fetch
+            let heading_to_onboarding = matches!(
+                destination,
+                Route::OnboardingWelcome { .. }
+                    | Route::OnboardingTerms { .. }
+                    | Route::OnboardingAccount { .. }
+            );
             if !heading_to_onboarding || !launcher.fetching {
                 // Raise the splash curtain so the hard route swap is hidden until Home settles onboarding animates itself
-                if !heading_to_onboarding && !heading_to_terms {
+                if !heading_to_onboarding {
                     let mut active = splash.active;
                     let mut home_ready = splash.home_ready;
                     home_ready.set(false);
@@ -132,13 +131,11 @@ impl Component for Startup {
 
         let active = notifications.inbox.iter().find(|entry| entry.is_loading);
 
-        let (message, detail, step): (String, Option<String>, u8) =
+        let (message, detail): (String, Option<String>) =
             if let Some(err) = launcher.error.as_deref() {
-                let step = if launcher.ready { 2 } else { 1 };
                 (
                     "Couldn't start OneClient".to_string(),
                     Some(err.to_string()),
-                    step,
                 )
             } else if let Some(entry) = active {
                 let detail = entry
@@ -147,11 +144,11 @@ impl Component for Startup {
                     .find(|t| t.total == 0 || t.current < t.total)
                     .map(|t| t.label.clone())
                     .or_else(|| entry.progress.map(|(c, t)| format!("{c} / {t}")));
-                (entry.title.clone(), detail, 3)
+                (entry.title.clone(), detail)
             } else if launcher.ready {
-                ("Fetching versions and bundles...".to_string(), None, 2)
+                ("Fetching versions and bundles...".to_string(), None)
             } else {
-                ("Starting OneClient...".to_string(), None, 1)
+                ("Starting OneClient...".to_string(), None)
             };
 
         let is_error = launcher.error.is_some();
@@ -165,15 +162,6 @@ impl Component for Startup {
         } else {
             colors::brand()
         };
-
-        let filled = f32::from(step) / f32::from(STARTUP_STEPS + 1) * 100.;
-
-        let progress = rect().width(Size::px(288.)).child(progress_track(
-            filled,
-            4.,
-            dot_color,
-            colors::fg_primary().with_a(30),
-        ));
 
         let loading_row = rect()
             .horizontal()
@@ -211,8 +199,7 @@ impl Component for Startup {
                     .color(colors::fg_primary().with_a(140)),
             )
             .child(rect().height(Size::px(14.)))
-            .child(loading_row)
-            .child(progress);
+            .child(loading_row);
 
         if let Some(detail) = detail {
             content = content.child(
@@ -227,9 +214,7 @@ impl Component for Startup {
         if is_error {
             content = content
                 .child(rect().height(Size::px(6.)))
-                .child(RecoveryActions {
-                    snapshots: launcher.snapshots,
-                })
+                .child(RecoveryActions { snapshots: launcher.snapshots })
                 .child(
                     label()
                         .text(format!(

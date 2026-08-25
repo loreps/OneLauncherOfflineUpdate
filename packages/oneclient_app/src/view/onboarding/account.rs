@@ -89,7 +89,7 @@ impl Component for OnboardingAccount {
             onboarding_illustration(IconType::OnboardingAccount),
             content,
             onboarding_nav(
-                Some(Route::OnboardingLanguage {}),
+                None,
                 Route::OnboardingBundles {},
                 has_account,
             ),

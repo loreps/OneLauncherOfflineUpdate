@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use freya::prelude::spawn_forever;
 use freya::radio::RadioStation;
-use oneclient_events::{Event, EventReceiver, GameEvent, LaunchStage, ProgressEvent, Signal};
+use oneclient_events::{Event, EventReceiver, GameEvent, LaunchStage, Signal};
 use tokio::sync::mpsc;
 
 use crate::hooks::PumpSignal;

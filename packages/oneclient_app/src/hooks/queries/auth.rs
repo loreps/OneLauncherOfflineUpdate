@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use freya::query::{
     Mutation, MutationCapability, MutationStateData, QueriesStorage, Query, QueryCapability,
     UseMutation, UseQuery, use_mutation, use_query,
