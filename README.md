@@ -1,6 +1,6 @@
 # OneLauncherOffline
 
-OneLauncherOffline is an offline-friendly fork of the OneLauncher client.
+OneLauncherOffline is an offline-account friendly fork of the OneLauncher client that doesnt require microsoft account like source Onelauncher does to use the app .
 
 Download
 

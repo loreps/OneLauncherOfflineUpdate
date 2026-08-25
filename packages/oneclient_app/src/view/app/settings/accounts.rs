@@ -6,12 +6,7 @@ use uuid::Uuid;
 
 use super::{section_header, settings_page};
 use crate::components::{
-<<<<<<< HEAD
-    Avatar, Button, Icon, IconType, MicrosoftLogin, OverlayPopup, PlayerModel, TextInput,
-    use_microsoft_login,
-=======
     Avatar, Button, Icon, IconType, OverlayPopup, PlayerModel, TextInput,
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 };
 use crate::hooks::{
     AddOfflineAccountKeys, RemoveAccountKeys, SetDefaultAccountKeys,
@@ -91,11 +86,6 @@ impl Component for SettingsAccounts {
                     is_default: Some(account.id) == default_id,
                     set_default,
                     remove,
-<<<<<<< HEAD
-                    refresh,
-                    sign_in: msa.clone(),
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
                 }
                 .into_element()
             })
@@ -357,16 +347,6 @@ fn hint_line(icon: IconType, text: String, color: Color) -> impl IntoElement {
         .into_element()
 }
 
-<<<<<<< HEAD
-const REFRESH_SPIN_TIME: u64 = 800;
-
-const REFRESHING_OPACITY: f32 = 0.7;
-
-/// Only the identity half fades the sign-in and remove buttons stay crisp
-const SIGNED_OUT_OPACITY: f32 = 0.45;
-
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 struct AccountRow {
     id: Uuid,
     username: String,
@@ -376,11 +356,6 @@ struct AccountRow {
     is_default: bool,
     set_default: crate::hooks::UseSetDefaultAccount,
     remove: crate::hooks::UseRemoveAccount,
-<<<<<<< HEAD
-    refresh: crate::hooks::UseRefreshAccount,
-    sign_in: MicrosoftLogin,
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 }
 
 impl PartialEq for AccountRow {
@@ -406,47 +381,7 @@ impl Component for AccountRow {
         let set_default = self.set_default;
         let remove = self.remove;
 
-<<<<<<< HEAD
-        let is_microsoft = self.kind == AccountKind::Microsoft;
-        let signed_out = is_microsoft && self.signed_out;
-        // A signed-out entry has no token left to call expired
-        let expired = is_microsoft && !signed_out && self.expires <= Utc::now();
-        let identity_opacity = if signed_out { SIGNED_OUT_OPACITY } else { 1. };
-        let sign_in = self.sign_in.clone();
-
-        let mut refreshing = use_state(|| false);
-        let is_refreshing = *refreshing.read();
-
-        let spin = use_animation(|conf| {
-            conf.on_finish(OnFinish::restart());
-            AnimNum::new(0., 360.)
-                .time(REFRESH_SPIN_TIME)
-                .function(Function::Linear)
-        });
-
-        use_side_effect_with_deps(&is_refreshing, move |&is_refreshing| {
-            let mut spin = spin;
-            if is_refreshing {
-                spin.start();
-            } else {
-                spin.reset();
-            }
-        });
-
-        let rotation = if is_refreshing {
-            spin.get().value()
-        } else {
-            0.
-        };
-
-        let border_color = if signed_out {
-            colors::component_border()
-        } else if expired {
-            colors::danger()
-        } else if is_default {
-=======
         let border_color = if is_default {
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
             colors::brand()
         } else {
             colors::component_border()
@@ -492,13 +427,7 @@ impl Component for AccountRow {
                                     .max_lines(1)
                                     .color(colors::fg_primary()),
                             )
-<<<<<<< HEAD
-                            .maybe_child(is_default.then(default_badge))
-                            .maybe_child(expired.then(expired_badge))
-                            .maybe_child(signed_out.then(signed_out_badge)),
-=======
                             .maybe_child(is_default.then(default_badge)),
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
                     )
                     .child(
                         label()
@@ -512,52 +441,6 @@ impl Component for AccountRow {
                             .color(colors::fg_secondary()),
                     ),
             )
-<<<<<<< HEAD
-            .maybe_child(signed_out.then(|| {
-                let pending = sign_in.pending;
-                Button::new()
-                    .secondary()
-                    .enabled(!pending)
-                    .tooltip("Sign in to this Microsoft account again")
-                    .on_press(move |e: Event<PressEventData>| {
-                        e.stop_propagation();
-                        sign_in.start();
-                    })
-                    .child(Icon::new(IconType::Globe01).size(16.))
-                    .text(if pending { "Signing in..." } else { "Sign in" })
-                    .into_element()
-            }))
-            .maybe_child((is_microsoft && !signed_out).then(|| {
-                Button::new()
-                    .ghost()
-                    .icon()
-                    .tooltip("Refresh this account")
-                    .on_press(move |e: Event<PressEventData>| {
-                        e.stop_propagation();
-                        if *refreshing.peek() {
-                            return;
-                        }
-                        refreshing.set(true);
-                        spawn(async move {
-                            refresh.mutate_async(RefreshAccountKeys { id }).await;
-                            refreshing.set(false);
-                        });
-                    })
-                    .child(
-                        rect().rotate(rotation).child(
-                            Icon::new(IconType::RefreshCw01)
-                                .size(18.)
-                                .color(if expired {
-                                    colors::danger()
-                                } else {
-                                    colors::fg_secondary()
-                                }),
-                        ),
-                    )
-                    .into_element()
-            }))
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
             .child(
                 Button::new()
                     .ghost()
@@ -608,33 +491,6 @@ fn default_badge() -> impl IntoElement {
     )
 }
 
-<<<<<<< HEAD
-fn expired_badge() -> impl IntoElement {
-    badge(
-        Icon::new(IconType::AlertTriangle)
-            .size(12.)
-            .color(colors::danger())
-            .into_element(),
-        "Expired".to_string(),
-        colors::danger(),
-        colors::danger(),
-    )
-}
-
-fn signed_out_badge() -> impl IntoElement {
-    badge(
-        Icon::new(IconType::AlertTriangle)
-            .size(12.)
-            .color(colors::fg_secondary())
-            .into_element(),
-        "Signed out".to_string(),
-        colors::component_border(),
-        colors::fg_secondary(),
-    )
-}
-
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 fn badge(icon: impl IntoElement, text: String, border: Color, fg: Color) -> impl IntoElement {
     rect()
         .horizontal()

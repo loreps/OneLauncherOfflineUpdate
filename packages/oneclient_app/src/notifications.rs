@@ -598,14 +598,6 @@ impl NotificationState {
                 );
                 self.push_ephemeral_toast(entry_id, MESSAGE_TOAST_TTL);
             }
-<<<<<<< HEAD
-
-            Event::Progress(ProgressEvent::Update { id, .. })
-                if id == oneclient_auth::MICROSOFT_LOGIN_PROGRESS => {}
-            Event::Progress(ProgressEvent::Update { id, .. })
-                if id == oneclient_core::storage::STORAGE_SCAN_PROGRESS => {}
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
             Event::Progress(ProgressEvent::Update {
                 id,
                 label,

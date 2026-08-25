@@ -2,13 +2,8 @@ use freya::query::{
     Mutation, MutationCapability, MutationStateData, QueriesStorage, Query, QueryCapability,
     UseMutation, UseQuery, use_mutation, use_query,
 };
-<<<<<<< HEAD
-use oneclient_auth::{AccountKind, MicrosoftLoginSession, MinecraftAccount};
-use oneclient_core::LauncherError;
-=======
 use oneclient_core::LauncherError;
 use oneclient_auth::{AccountKind, MinecraftAccount};
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 use uuid::Uuid;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -113,91 +108,6 @@ pub async fn invalidate_auth_queries(account_id: Option<Uuid>) {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-<<<<<<< HEAD
-pub struct BeginMicrosoftLoginMutation;
-
-impl MutationCapability for BeginMicrosoftLoginMutation {
-    type Ok = MicrosoftLoginSession;
-    type Err = LauncherError;
-    type Keys = ();
-
-    async fn run(&self, _keys: &Self::Keys) -> Result<Self::Ok, Self::Err> {
-        Ok(crate::launcher::state()?
-            .auth
-            .begin_microsoft_login()
-            .await?)
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct FinishMicrosoftLoginMutation;
-
-impl MutationCapability for FinishMicrosoftLoginMutation {
-    type Ok = MinecraftAccount;
-    type Err = LauncherError;
-    type Keys = MicrosoftLoginSession;
-
-    async fn run(&self, flow: &Self::Keys) -> Result<Self::Ok, Self::Err> {
-        Ok(crate::launcher::state()?
-            .auth
-            .finish_microsoft_login(flow.clone())
-            .await?)
-    }
-
-    async fn on_settled(&self, _keys: &Self::Keys, result: &Result<Self::Ok, Self::Err>) {
-        if let Ok(account) = result {
-            invalidate_auth_queries(Some(account.id)).await;
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct CancelMicrosoftLoginMutation;
-
-/// Keyed by the session's CSRF state token
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct CancelMicrosoftLoginKeys {
-    pub state_token: String,
-}
-
-impl MutationCapability for CancelMicrosoftLoginMutation {
-    type Ok = ();
-    type Err = LauncherError;
-    type Keys = CancelMicrosoftLoginKeys;
-
-    async fn run(&self, keys: &Self::Keys) -> Result<Self::Ok, Self::Err> {
-        crate::launcher::state()?
-            .auth
-            .cancel_microsoft_login(&keys.state_token)
-            .await;
-        Ok(())
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct AddMicrosoftAccountMutation;
-
-impl MutationCapability for AddMicrosoftAccountMutation {
-    type Ok = MinecraftAccount;
-    type Err = LauncherError;
-    type Keys = ();
-
-    async fn run(&self, _keys: &Self::Keys) -> Result<Self::Ok, Self::Err> {
-        let state = crate::launcher::state()?;
-        let flow = state.auth.begin_microsoft_login().await?;
-        Ok(state.auth.finish_microsoft_login(flow).await?)
-    }
-
-    async fn on_settled(&self, _keys: &Self::Keys, result: &Result<Self::Ok, Self::Err>) {
-        if let Ok(account) = result {
-            invalidate_auth_queries(Some(account.id)).await;
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-=======
->>>>>>> 7286ee5e (refactor: remove Microsoft account requirement, offline-only UI)
 pub struct AddOfflineAccountMutation;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
